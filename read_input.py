@@ -27,6 +27,7 @@ import cv2
 import tensorflow as tf
 import keras as k
 
+import ImageInput as CImg
 
 
 def load_dat_by_line(filePath, data_type, fileExtension):
@@ -71,6 +72,34 @@ def load_dat_by_line(filePath, data_type, fileExtension):
                                 data_dictionary[unique_key] = line
                                 line_count += 1
 
+    return data_dictionary
+
+
+def load_lines_by_directory(filePath: str, fileExtension: str):
+    data_dictionary = {}
+
+    for dir1_name in os.listdir(filePath):
+        filePath1 = os.path.join(filePath, dir1_name)
+        if not os.path.isdir(filePath1):
+            continue
+
+        for dir2_name in os.listdir(filePath1):
+            file2Path = os.path.join(filePath1, dir2_name)
+            folder_dictionary = {}
+
+            if not os.path.isdir(file2Path):
+                continue
+
+            for filename in os.listdir(file2Path):
+                f = os.path.join(file2Path, filename)
+
+                if os.path.isfile(f):
+                    with open(f) as reader:
+                        lines = reader.readlines()
+                    key = filename.replace(fileExtension, "")
+                    folder_dictionary[key] = lines
+
+            data_dictionary[dir2_name] = folder_dictionary
     return data_dictionary
 
 
@@ -151,3 +180,32 @@ def process_image(filepath: str):
         interpolation="nearest"
     )
     return img
+
+
+def load_image_by_directory(filePath,  fileExtension):
+
+    data_dictionary = {}
+
+    for dir1_name in os.listdir(filePath):
+        filePath1 = os.path.join(filePath, dir1_name)
+        if not os.path.isdir(filePath1):
+            continue
+
+        for dir2_name in os.listdir(filePath1):
+            file2Path = os.path.join(filePath1, dir2_name)
+            image_list = []
+
+            if not os.path.isdir(file2Path):
+                continue
+
+            for filename in os.listdir(file2Path):
+                f = os.path.join(file2Path, filename)
+
+                if os.path.isfile(f):
+                    img = process_image(f)
+                    key = filename.replace(fileExtension, "")
+                    wrapperObject = CImg.ImageInput(key, img)
+                    image_list.append(wrapperObject)
+            data_dictionary[dir2_name] = image_list
+
+    return data_dictionary

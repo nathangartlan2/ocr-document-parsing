@@ -2,11 +2,18 @@ import os
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+import keras
 
 
-def read_word_labels(directory_path: str):
+def read_word_labels(directory_path: str, use_mini: bool):
     dataset = []
-    f = os.path.join(directory_path, "ascii/words.txt")
+
+    word_file = "ascii/words.txt"
+
+    if use_mini:
+        word_file = "ascii/words_mini.txt"
+
+    f = os.path.join(directory_path, word_file)
 
     if os.path.isfile(f):
         with open(f) as reader:
@@ -35,17 +42,20 @@ def read_word_labels(directory_path: str):
 def load_and_label_word_images(word_labels: list):
     images = []
     labels = []
+
     for path_label in word_labels:
         img = tf.keras.utils.load_img(
             path_label[0],
-            grayscale=True,
+            color_mode="grayscale",
             target_size=(180, 180)
         )
-        image_array = tf.keras.utils.image.img_to_array(img)
+        image_array = tf.keras.utils.img_to_array(img)
         images.append(image_array)
         labels.append(path_label[1])
 
-    np_image = np.array(images)
-    np_labels = np.array(labels)
+    image_tensor = tf.convert_to_tensor(np.array(images), dtype=tf.float32)
+    labels_tensor = tf.convert_to_tensor(np.array(labels), dtype=tf.string)
 
-    return tf.data.Dataset.from_tensor_slices((np_image, np_labels))
+    data_set = tf.data.Dataset.from_tensor_slices(
+        (images, labels))
+    return data_set

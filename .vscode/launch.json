@@ -8,7 +8,15 @@
             "name": "Main",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "handwriting/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "synthetic",
+            "type": "python",
+            "request": "launch",
+            "program": "typed_project/synthetic_data/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }

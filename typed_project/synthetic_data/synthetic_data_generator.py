@@ -8,7 +8,7 @@ class synthetic_data_generator():
         self.training_data = training_data
         self.output_root_directory = output_root_directory
 
-    def generator_verse_pdf(self, number_verses):
+    def generator_verse_pdf(self, number_verses, font_size: int):
         num = number_verses
         if number_verses == 0:
             num = self.training_data.size[1]
@@ -27,7 +27,8 @@ class synthetic_data_generator():
 
             # set style and size of font
             # that you want in the pdf
-            pdf.set_font("Arial", size=16)
+            pdf.set_font("Times", size=font_size)
+
             # create a cell
             pdf.multi_cell(0, 10, txt=self.training_data[i], align='L')
             manifest.append([i, self.training_data[i]])

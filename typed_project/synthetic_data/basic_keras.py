@@ -1,24 +1,25 @@
 import keras
 from keras import layers
 import matplotlib.pyplot as plt
-import model_base
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
+import sklearn
+import bidict as bd
+import numpy as np
 
 
-class basic_keras(model_base):
+class basic_keras():
 
-    def compile(self, width, height):
-        inputs = keras.Input(shape=(width, height, 1))
+    def compile(self):
+        inputs = keras.Input(shape=(self.width, self.height, 3))
         x = layers.Rescaling(1./255)(inputs)
-        x = layers.Conv2D(filters=32, kernel_size=1, activation="relu")(x)
+        x = layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
         x = layers.MaxPooling2D(pool_size=2)(x)
-        x = layers.Conv2D(filters=64, kernel_size=1, activation="relu")(x)
+        x = layers.Conv2D(filters=64, kernel_size=3, activation="relu")(x)
         x = layers.MaxPooling2D(pool_size=2)(x)
-        x = layers.Conv2D(filters=128, kernel_size=1, activation="relu")(x)
+        x = layers.Conv2D(filters=128, kernel_size=3, activation="relu")(x)
         x = layers.MaxPooling2D(pool_size=2)(x)
-        x = layers.Conv2D(filters=256, kernel_size=1, activation="relu")(x)
-        x = layers.MaxPooling2D(pool_size=2)(x)
-        x = layers.Conv2D(filters=256, kernel_size=1, activation="relu")(x)
+        x = layers.Conv2D(filters=256, kernel_size=3, activation="relu")(x)
         x = layers.Flatten()(x)
         outputs = layers.Dense(1, activation="sigmoid")(x)
         model = keras.Model(inputs=inputs, outputs=outputs)
@@ -29,6 +30,17 @@ class basic_keras(model_base):
 
         return model
 
+    def numeric_labels(self):
+        dict = {}
+        numeric_labels = []
+        for i in range(0, len(self.labels)):
+            dict[self.labels[i]] = i
+            numeric_labels.append(i)
+
+        self.translation = bd.bidict(dict)
+
+        return numeric_labels
+
     def __init__(self,
                  labels,
                  images,
@@ -38,21 +50,28 @@ class basic_keras(model_base):
         self.images = images
         self.width = width
         self.height = height
-        self.model = compile(self)
+        self.numeric_labels = self.numeric_labels()
+        self.model = self.compile()
 
-    def resize_images(self):
+    def format_inputs(self):
         resized_images = []
+        formated_labels = []
 
         for image in self.images:
             image_tensor = tf.keras.preprocessing.image.img_to_array(image)
             resized_image = tf.image.resize_with_pad(
                 image_tensor, target_height=self.height, target_width=self.width)
 
-            resized_image = tf.keras.preprocessing.image.array_to_img(
-                resized_image)
+            # resized_image = tf.keras.preprocessing.image.array_to_img(
+            #     resized_image)
             resized_images.append(resized_image)
 
-        return resized_images
+        for label in self.numeric_labels:
+            tensor_value = tf.constant(label)
+            # formated_labels.append(tensor_value)
+            formated_labels.append(label)
+
+        return np.array(resized_images), np.array(formated_labels)
 
     def train(self):
         callbacks = [
@@ -62,14 +81,24 @@ class basic_keras(model_base):
                 monitor="val_loss")
         ]
 
-        x_resized = self.resize_images()
+        X, Y = self.format_inputs()
+
+        x_train, x_val, y_train, y_val = train_test_split(
+            X, Y, test_size=0.2, random_state=42)
+
+        x_train = tf.convert_to_tensor(x_train)
+        y_train = tf.convert_to_tensor(y_train)
+        x_val = tf.convert_to_tensor(x_val)
+        y_val = tf.convert_to_tensor(y_val)
 
         self.history = self.model.fit(
-            x_resized,
-            self.labels,
+            x=x_train,
+            y=y_train,
             epochs=10,
             callbacks=callbacks,
-            validation_split=0.2)
+            # validation_split=.2
+            validation_data=(x_val, y_val)
+        )
 
     def plot_training(self):
 

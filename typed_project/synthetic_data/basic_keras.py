@@ -6,12 +6,13 @@ import tensorflow as tf
 import sklearn
 import bidict as bd
 import numpy as np
+import cv2
 
 
 class basic_keras():
 
     def compile(self):
-        inputs = keras.Input(shape=(self.width, self.height, 3))
+        inputs = keras.Input(shape=(self.width, self.height, 1))
         x = layers.Rescaling(1./255)(inputs)
         x = layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
         x = layers.MaxPooling2D(pool_size=2)(x)
@@ -45,20 +46,29 @@ class basic_keras():
                  labels,
                  images,
                  width,
-                 height) -> None:
+                 height,
+                 demo: bool) -> None:
         self.labels = labels
         self.images = images
         self.width = width
         self.height = height
         self.numeric_labels = self.numeric_labels()
         self.model = self.compile()
+        self.demo = demo
 
     def format_inputs(self):
         resized_images = []
         formated_labels = []
 
         for image in self.images:
-            image_tensor = tf.keras.preprocessing.image.img_to_array(image)
+
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            if self.demo:
+                cv2.imshow("input", image)
+                cv2.waitKey(1000)
+
+            image_tensor = tf.keras.preprocessing.image.img_to_array(
+                image)
             resized_image = tf.image.resize_with_pad(
                 image_tensor, target_height=self.height, target_width=self.width)
 
@@ -94,7 +104,7 @@ class basic_keras():
         self.history = self.model.fit(
             x=x_train,
             y=y_train,
-            epochs=10,
+            epochs=100,
             callbacks=callbacks,
             # validation_split=.2
             validation_data=(x_val, y_val)

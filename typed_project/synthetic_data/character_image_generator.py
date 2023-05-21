@@ -11,13 +11,15 @@ SUPPORTED_CHARS = string.ascii_letters + \
     string.digits + string.punctuation + " "
 
 
-def create_permutations(supported_characters: string):
+def create_permutations(supported_characters: string, permute: bool):
     allChars = list(supported_characters)
     pairlist = list(itertools.combinations(supported_characters, 2))
 
     pairStrings = []
-    for pair in pairlist:
-        pairStrings.append(pair[0] + pair[1])
+
+    if permute:
+        for pair in pairlist:
+            pairStrings.append(pair[0] + pair[1])
 
     allChars = allChars + pairStrings
     return allChars
@@ -57,6 +59,16 @@ def create_base_images(input_char: string, demo: bool):
     base_images.append(create_base_image(
         input_char, cv2.FONT_HERSHEY_COMPLEX, demo))
     base_images.append(create_base_image(
+        input_char, cv2.FONT_HERSHEY_COMPLEX_SMALL, demo))
+    base_images.append(create_base_image(
+        input_char, cv2.FONT_HERSHEY_DUPLEX, demo))
+    base_images.append(create_base_image(
+        input_char, cv2.FONT_HERSHEY_PLAIN, demo))
+    base_images.append(create_base_image(
+        input_char, cv2.FONT_HERSHEY_SCRIPT_COMPLEX, demo))
+    base_images.append(create_base_image(
+        input_char, cv2.FONT_ITALIC, demo))
+    base_images.append(create_base_image(
         input_char, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, demo))
     base_images.append(create_base_image(
         input_char, cv2.FONT_HERSHEY_SIMPLEX, demo))
@@ -86,3 +98,51 @@ def label_all_images(characters, image_arrays):
             all_labels.append(characters[i])
             images_flat.append(image)
     return all_labels, images_flat
+
+
+def rotate_image(image, demo: bool):
+    rotation_angles = [15, 30, 45, 60, 75, 90, 105, 120, 135, 150,
+                       165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345]
+
+    rotated_images = []
+
+    # Get the image dimensions
+    height, width = image.shape[:2]
+
+    for angle in rotation_angles:
+        # Calculate the rotation matrix
+        rotation_matrix = cv2.getRotationMatrix2D(
+            (width / 2, height / 2), angle, 1)
+
+        # Perform the rotation
+        rotated_image = cv2.warpAffine(
+            image, rotation_matrix, (width, height), borderValue=(255, 255, 255))
+
+        # Display the rotated image
+        if(demo):
+            cv2.imshow("Rotated Image", rotated_image)
+            cv2.waitKey(200)
+        rotated_images.append(rotated_image)
+
+    return rotated_images
+
+
+def create_distortions(labels, image_sets,
+                       num_repeats: int,  demo: bool):
+    expaned_sets = []
+
+    for i in range(0, len(labels)):
+        label = labels[i]
+        image_set = image_sets[i]
+        set_with_rotated = []
+        for image in image_set:
+            set_with_rotated += rotate_image(image, demo)
+
+        set_array = np.array(set_with_rotated)
+        set_array = np.repeat(
+            set_array, repeats=num_repeats, axis=0)
+        expaned_sets.append(set_array)
+
+    # Copy each element of the array a number of times
+
+    return labels, expaned_sets

@@ -16,6 +16,9 @@ mode = "CHARACTER"
 WIDTH = 50
 HEIGHT = 50
 
+IS_DEMO = False
+MODEL_DEMO = False
+
 
 def main():
 
@@ -37,14 +40,25 @@ def main():
         ocv_model = ocv.open_cv_model(labels, images)
         ocv_model.preprocess_training()
     elif mode == "CHARACTER":
-        char_list = ch.create_permutations(ch.SUPPORTED_CHARS)
+        print("Creating permutations")
+        char_list = ch.create_permutations("ab", permute=True)
 
+        print("Creating base images")
         characters, image_sets = ch.create_all_base_images(
-            char_list, demo=False)
+            char_list, demo=IS_DEMO)
+
+        print("Making distortions and copies")
+        characters, image_sets = ch.create_distortions(
+            characters, image_sets, num_repeats=5, demo=IS_DEMO)
+
+        print("Making distortions and copies")
         labels, images = ch.label_all_images(characters, image_sets)
 
+        print("Initializing model")
         keras_model = kr.basic_keras(
-            images=images, labels=labels, width=WIDTH, height=HEIGHT)
+            images=images, labels=labels, width=WIDTH, height=HEIGHT, demo=MODEL_DEMO)
+
+        print("Training model")
         keras_model.train()
         keras_model.plot_training()
 

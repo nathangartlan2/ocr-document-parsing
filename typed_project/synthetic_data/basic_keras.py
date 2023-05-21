@@ -62,6 +62,7 @@ class basic_keras():
 
         for image in self.images:
 
+            # change image to grayscale
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             if self.demo:
                 cv2.imshow("input", image)
@@ -69,6 +70,8 @@ class basic_keras():
 
             image_tensor = tf.keras.preprocessing.image.img_to_array(
                 image)
+
+            # resize the image with padding
             resized_image = tf.image.resize_with_pad(
                 image_tensor, target_height=self.height, target_width=self.width)
 
@@ -77,8 +80,6 @@ class basic_keras():
             resized_images.append(resized_image)
 
         for label in self.numeric_labels:
-            tensor_value = tf.constant(label)
-            # formated_labels.append(tensor_value)
             formated_labels.append(label)
 
         return np.array(resized_images), np.array(formated_labels)
@@ -106,7 +107,6 @@ class basic_keras():
             y=y_train,
             epochs=100,
             callbacks=callbacks,
-            # validation_split=.2
             validation_data=(x_val, y_val)
         )
 

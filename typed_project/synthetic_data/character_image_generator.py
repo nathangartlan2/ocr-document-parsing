@@ -6,9 +6,13 @@ import os
 import numpy as np
 import itertools
 
-
+# all English characters supported by this program
 SUPPORTED_CHARS = string.ascii_letters + \
     string.digits + string.punctuation + " "
+
+# creates permutations of character data
+# for example, if supported_characters = "abc" and permute = True
+# this will return  ["a", "b", "c", "ab", "bc", "ac"]
 
 
 def create_permutations(supported_characters: string, permute: bool):
@@ -23,6 +27,8 @@ def create_permutations(supported_characters: string, permute: bool):
 
     allChars = allChars + pairStrings
     return allChars
+
+# creates and image of a single character
 
 
 def create_base_image(input: string, input_font: int,  demo: bool):
@@ -52,6 +58,8 @@ def create_base_image(input: string, input_font: int,  demo: bool):
     # Return resulting image
     return image
 
+# creates base images in multiple fonts
+
 
 def create_base_images(input_char: string, demo: bool):
     base_images = []
@@ -77,6 +85,8 @@ def create_base_images(input_char: string, demo: bool):
 
     return base_images
 
+# creates images for all_chars
+
 
 def create_all_base_images(all_chars, demo: bool):
     labels = []
@@ -87,6 +97,8 @@ def create_all_base_images(all_chars, demo: bool):
         image_set.append(create_base_images(character, demo))
 
     return labels, image_set
+
+# apply character label to all images
 
 
 def label_all_images(characters, image_arrays):

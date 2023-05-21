@@ -11,7 +11,7 @@ import cv2
 url = "https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/t_kjv.csv"
 
 outputPath = "/Users/nathangartlan1/Documents/AA-Nathan/uchicago-mpcs-work/AppliedDataAnalysis/Project/synthetic_data/"
-mode = "CHARACTER"
+MODE = "CHARACTER"
 
 WIDTH = 50
 HEIGHT = 50
@@ -22,24 +22,24 @@ MODEL_DEMO = False
 
 def main():
 
-    if mode == "GENERATE_DATA":
+    if MODE == "GENERATE_DATA":
         input_text = pd.read_csv(url)
         texts = input_text["t"]
         generator = sn.synthetic_data_generator(texts, outputPath)
         generator.generator_verse_pdf(100, 20)
-    elif mode == "TESSERACT":
+    elif MODE == "TESSERACT":
 
         labels, images = rd.read_data(outputPath)
 
         tesseract = ts.tesseract_model(labels, images)
 
         tesseract.inference()
-    elif mode == "OPEN_CV":
+    elif MODE == "OPEN_CV":
         labels, images = rd.read_data(outputPath)
 
         ocv_model = ocv.open_cv_model(labels, images)
         ocv_model.preprocess_training()
-    elif mode == "CHARACTER":
+    elif MODE == "CHARACTER":
         print("Creating permutations")
         char_list = ch.create_permutations("ab", permute=True)
 
@@ -62,9 +62,9 @@ def main():
         keras_model.train()
         keras_model.plot_training()
 
-        print("Time for the model")
+        print("Model training complete")
 
-    print("Äll done")
+    print("All done")
 
 
 if __name__ == "__main__":
